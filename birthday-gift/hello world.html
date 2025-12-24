@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy 20th Birthday!</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="page-flip.browser.js"></script>
+
+    <style>
+        /* --- 1. Global Reset --- */
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; padding: 0; background-color: #f2f2f2;
+            font-family: 'Microsoft YaHei', 'SimHei', Arial, sans-serif;
+            overflow: hidden; -webkit-text-size-adjust: none; text-size-adjust: none;
+            
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .birthday-container {
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; width: 100%; position: relative; touch-action: none; 
+        }
+
+        .credits {
+            position: fixed; bottom: 10px; right: 15px; font-size: 12px; color: #bbb;
+            font-family: Arial, sans-serif; z-index: 9999; pointer-events: none;
+            text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 0 #fff;
+        }
+
+        /* --- 2. Cake Styles --- */
+        @keyframes popUp {
+            0% { transform: scale(0.1); opacity: 0; }
+            80% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .cake {
+            position: relative; display: flex; flex-direction: column-reverse; align-items: center; justify-content: center;
+            animation: popUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin-bottom: 50px; transform-origin: center center;
+        }
+        .tier { position: relative; border-radius: 10px 10px 5px 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .tier-bottom { width: 200px; height: 60px; background-color: #5D4037; border-bottom: 4px solid #3E2723; }
+        .tier-middle { width: 150px; height: 50px; background-color: #795548; border-bottom: 3px solid #5D4037; margin-bottom: -5px; z-index: 1; }
+        .tier-top { width: 100px; height: 45px; background-color: #C5E1A5; border-radius: 15px 15px 5px 5px; border-bottom: 2px solid #AED581; margin-bottom: -5px; z-index: 2; }
+        .candles-group { display: flex; gap: 15px; position: relative; top: 15px; z-index: 1; }
+        .candle { position: relative; display: flex; justify-content: center; }
+        
+        .number {
+            font-size: 60px; font-weight: bold; font-family: Arial, sans-serif; color: #FFF; line-height: 1; -webkit-text-stroke: 2px #b71c1c; 
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1); cursor: default; user-select: none; -webkit-user-select: none; flex-shrink: 0; 
+        }
+
+        .flame {
+            width: 10px; height: 20px; left: 6px; position: absolute; bottom: 100%; margin-bottom: -5px;
+            background: radial-gradient(ellipse at bottom, #ffeb3b 0%, #ff9800 50%, #ff5722 100%);
+            border-radius: 50% 50% 20% 50%; transform: rotate(45deg); transform-origin: bottom center;
+            animation: flicker 1s infinite alternate ease-in-out; transition: all 0.5s ease;
+        }
+        @keyframes flicker { 0% { transform: rotate(45deg) scale(1); opacity: 1; } 100% { transform: rotate(45deg) scale(1.2); opacity: 0.9; } }
+        .flame.out { opacity: 0; transform: rotate(45deg) scale(0.1); animation: none; }
+
+        /* --- Swipe Hint --- */
+        .swipe-hint-container {
+            position: absolute; top: -50px; left: 50%; z-index: 10; opacity: 0; pointer-events: none;
+            animation: swipeAppear 0.5s ease 1.2s forwards, swipeGesture 1.5s ease-in-out 1.7s infinite;
+            transition: opacity 0.5s ease;
+        }
+        .hand-icon {
+            width: 50px; height: 50px; display: block; transform: rotate(180deg);
+            filter: invert(24%) sepia(13%) saturate(1637%) hue-rotate(314deg) brightness(93%) contrast(87%) drop-shadow(0 -2px 5px rgba(0,0,0,0.2));
+        }
+        @keyframes swipeAppear { to { opacity: 1; } }
+        @keyframes swipeGesture {
+            0% { transform: translateX(-150%) translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            50% { transform: translateX(-50%) translateY(10px); }
+            90% { opacity: 1; }
+            100% { transform: translateX(50%) translateY(0); opacity: 0; }
+        }
+        .swipe-hint-container.hide { opacity: 0 !important; animation: none; }
+
+        /* --- Pop-up --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); 
+            display: flex; justify-content: center; align-items: center; z-index: 9999;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 80%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3); transform: scale(0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.show .modal-box { transform: scale(1); }
+        .modal-box h2 { margin: 0 0 10px 0; color: #D81B60; font-size: 1.5rem; }
+        .modal-box p { color: #555; font-size: 1.1rem; margin-bottom: 20px; line-height: 1.5; }
+        .modal-btn {
+            background-color: #D81B60; color: white; border: none; padding: 12px 25px;
+            font-size: 1rem; border-radius: 25px; cursor: pointer; transition: background 0.2s; outline: none;
+        }
+        .modal-btn:hover { background-color: #AD1457; }
+
+        /* --- Book Section --- */
+        #book-section {
+            display: none; justify-content: center; align-items: center;
+            width: 100%; height: 100vh; opacity: 0; transition: opacity 1s ease; background-color: #f2f2f2;
+        }
+        .my-book { width: min(95vw, calc(80vh * (1100 / 733))); aspect-ratio: 1100 / 733; margin: 0 auto; }
+
+        @media (max-width: 768px) {
+            .cake { transform: scale(0.85); }
+            .my-book { width: 85vw; height: auto; aspect-ratio: 550 / 733; max-height: 85vh; }
+            .modal-box h2 { font-size: 1.3rem; }
+            .modal-box p { font-size: 1rem; }
+            .page.cover h1 { font-size: 2rem !important; }
+            .page.cover p { font-size: 1rem !important; }
+            .open-hint { margin-top: 30px !important; }
+            .polaroid-frame { transform: scale(0.9) rotate(-3deg); }
+        }
+
+        .page { padding: 20px; background-color: #fff; overflow: hidden; border: 1px solid #ddd; }
+        .page:nth-child(even) { border-right: none; border-radius: 5px 0 0 5px; }
+        .page:nth-child(odd) { border-left: none; border-radius: 0 5px 5px 0; }
+
+        .page.cover {
+            background-color: #FFCDD2; color: #880E4F;
+            background-image: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(136, 14, 79, 0.03) 2px, rgba(136, 14, 79, 0.03) 4px), repeating-linear-gradient(90deg, transparent 0px, transparent 2px, rgba(136, 14, 79, 0.03) 2px, rgba(136, 14, 79, 0.03) 4px), linear-gradient(135deg, #ffcdd2 0%, #e57373 100%);
+            border: 1px solid #D81B60; border-radius: 0 12px 12px 0; border-left: 10px solid #AD1457;
+            box-shadow: inset -3px 0 15px rgba(0,0,0,0.1), inset 0 0 5px rgba(255,255,255,0.3);
+        }
+        .page.cover h1 { font-family: 'Georgia', serif; font-size: 3rem; text-shadow: 1px 2px 3px rgba(136, 14, 79, 0.3); letter-spacing: 2px; margin-top: 20px; }
+        .page.cover p { font-family: 'Georgia', serif; font-style: italic; opacity: 0.8; }
+        .open-hint { margin-top: 50px; font-size: 1.1rem; color: #880E4F; font-weight: bold; opacity: 0.8; display: flex; align-items: center; justify-content: center; gap: 10px; animation: bounceRight 1.5s infinite; }
+        @keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+
+        .page.last-page {
+            background-color: #fff0f5; background-image: radial-gradient(#f48fb1 2px, transparent 2px); background-size: 20px 20px;
+            border-right: none; border-left: none; border: 5px solid #fff; box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+        }
+        .polaroid-frame {
+            background: white; padding: 15px 15px 40px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: rotate(-3deg); margin-bottom: 30px; width: 70%; max-width: 200px;
+        }
+        .last-page h2 { font-family: 'Brush Script MT', cursive; font-size: 2.5rem; color: #880E4F; margin-bottom: 10px; }
+        .last-page p { font-size: 1.2rem; color: #555; font-style: italic; }
+
+        .page-content { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        /* .page-content h1, h2 removed or hidden if loop doesn't generate them */
+        .page-content p { font-size: 1.2rem; }
+        
+        .photo-container {
+            width: 100%; 
+            height: 100%; 
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 5px; overflow: hidden; background-color: #eee;
+            
+            pointer-events: none; 
+        }
+        .photo-container img { width: 100%; height: 100%; object-fit: cover; }
+
+    </style>
+</head>
+<body>
+
+    <div class="credits">web power by Azrael</div>
+
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h2>🎉 Happy Birthday!</h2>
+            <p>生日快樂！準備好收禮物了嗎?<br>٩(๑ᵒ̴̶̷͈᷄ᗨᵒ̴̶̷͈᷅)و</p>
+            <button id="modal-btn" class="modal-btn">拆禮物!</button>
+        </div>
+    </div>
+
+    <div class="birthday-container">
+        <div class="cake" id="cake">
+            <div class="tier tier-bottom"></div>
+            <div class="tier tier-middle"></div>
+            <div class="tier tier-top"></div>
+            <div class="candles-group">
+                <div class="candle"> <div class="flame"></div> <span class="number">2</span> </div>
+                <div class="candle"> <div class="flame"></div> <span class="number">0</span> </div>
+            </div>
+            <div id="swipe-hint" class="swipe-hint-container">
+                <img src="hand-point-up-regular.svg" class="hand-icon" alt="swipe hint">
+            </div>
+        </div>
+
+        <div id="book-section">
+            <div class="my-book" id="my-book"></div>
+        </div>
+    </div>
+
+    <script>
+        // Change this no. to total image
+        const totalImages = 3; 
+        // ---------------
+
+        const cakeContainer = document.querySelector('.birthday-container');
+        const cake = document.getElementById('cake');
+        const flames = document.querySelectorAll('.flame');
+        const hintContainer = document.getElementById('swipe-hint');
+        const bookSection = document.getElementById('book-section');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalBtn = document.getElementById('modal-btn');
+        const bookContainer = document.getElementById('my-book');
+
+        let startX = 0, startY = 0, isMouseDown = false, isExtinguished = false;
+        const threshold = 50; 
+
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // Interaction Logic
+        cakeContainer.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; });
+        cakeContainer.addEventListener('touchend', e => { handleSwipe(startX, startY, e.changedTouches[0].clientX, e.changedTouches[0].clientY); });
+        cakeContainer.addEventListener('mousedown', e => { isMouseDown = true; startX = e.clientX; startY = e.clientY; });
+        cakeContainer.addEventListener('mouseup', e => { if (!isMouseDown) return; isMouseDown = false; handleSwipe(startX, startY, e.clientX, e.clientY); });
+
+        function handleSwipe(sX, sY, eX, eY) {
+            if (!isExtinguished && (Math.abs(eX - sX) > threshold || Math.abs(eY - sY) > threshold)) blowOutCandles();
+        }
+
+        function blowOutCandles() {
+            isExtinguished = true;
+            if (hintContainer) hintContainer.classList.add('hide');
+            flames.forEach(flame => { flame.classList.add('out'); });
+            setTimeout(() => { modalOverlay.classList.add('show'); }, 500);
+        }
+
+        modalBtn.addEventListener('click', function() {
+            modalOverlay.classList.remove('show');
+            startCelebration();
+        });
+
+        function startCelebration() {
+            cake.style.transition = 'opacity 1s ease'; cake.style.opacity = '0';
+            setTimeout(() => {
+                cake.style.display = 'none';
+                if (bookSection) {
+                    bookSection.style.display = 'flex'; 
+                    generateBookHTML();
+                    setTimeout(() => {
+                        initFlipBook();
+                        bookSection.style.opacity = '1'; 
+                    }, 100);
+                }
+            }, 1000);
+        }
+
+        function generateBookHTML() {
+            let htmlContent = '';
+
+            // cover
+            htmlContent += `
+                <div class="page cover" data-density="hard">
+                    <div class="page-content">
+                        <h1>Happy<br>Birthday!</h1>
+                        <p>To Taylor !</p>
+                        <div class="open-hint">
+                             <span>( ˘ ³˘)♥ 滑動翻頁</span>
+                             <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // content
+            for (let i = 1; i <= totalImages; i++) {
+                htmlContent += `
+                    <div class="page">
+                        <div class="page-content">
+                            <div class="photo-container">
+                                <img src="images/${i}.jpg" alt="Photo ${i}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // last page
+            htmlContent += `
+                <div class="page last-page" data-density="hard">
+                    <div class="page-content">
+                        <div class="polaroid-frame">
+                            <div style="width:100%; height:150px; background:#ddd; display:flex; align-items:center; justify-content:center; color:#888;">
+                                <i class="fas fa-camera fa-2x"></i>
+                            </div>
+                        </div>
+                        <h2>To Be Continued...</h2>
+                        <p style="font-size: 0.9rem; margin-top: 20px;">Forever Friends ❤️</p>
+                    </div>
+                </div>
+            `;
+
+            bookContainer.innerHTML = htmlContent;
+        }
+
+        function initFlipBook() {
+            const isMobile = window.innerWidth < 768;
+            const pageFlip = new St.PageFlip(document.getElementById('my-book'), {
+                width: 550, height: 733, size: 'stretch',
+                minWidth: 315, maxWidth: 1000, minHeight: 420, maxHeight: 1350,
+                usePortrait: isMobile, maxShadowOpacity: 0.2, showCover: true, mobileScrollSupport: false 
+            });
+            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+        }
+    </script>
+</body>
+</html>
