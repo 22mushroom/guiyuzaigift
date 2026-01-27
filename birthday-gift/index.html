@@ -44,7 +44,6 @@
             animation: popUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; margin-bottom: 50px; transform-origin: center center;
             pointer-events: none;
         }
-        /* Mobile adjustment for Cake */
         @media (max-width: 768px) {
             .cake { transform: scale(0.85); margin-bottom: 80px; }
         }
@@ -66,12 +65,17 @@
         @keyframes flicker { 0% { transform: rotate(45deg) scale(1); opacity: 1; } 100% { transform: rotate(45deg) scale(1.2); opacity: 0.9; } }
         .flame.out { opacity: 0; transform: rotate(45deg) scale(0.1); animation: none; }
 
+        /* Swipe Hint */
         .swipe-hint-container {
             position: absolute; top: -50px; left: 50%; z-index: 10; opacity: 0; pointer-events: none;
             animation: swipeAppear 0.5s ease 1.2s forwards, swipeGesture 1.5s ease-in-out 1.7s infinite;
             transition: opacity 0.5s ease;
         }
-        .hand-icon { width: 50px; height: 50px; display: block; transform: rotate(180deg); filter: invert(24%) sepia(13%) saturate(1637%) hue-rotate(314deg) brightness(93%) contrast(87%); }
+        .hand-icon { 
+            width: 50px; height: 50px; display: block; 
+            transform: rotate(180deg);
+            filter: invert(24%) sepia(13%) saturate(1637%) hue-rotate(314deg) brightness(93%) contrast(87%); 
+        }
         @keyframes swipeAppear { to { opacity: 1; } }
         @keyframes swipeGesture {
             0% { transform: translateX(-150%) translateY(0); opacity: 0; }
@@ -96,22 +100,15 @@
         }
         .modal-btn { background-color: #D81B60; color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-size: 1rem;}
 
-        /* --- 4. Book Styles (Updated for Responsive) --- */
+        /* --- 4. Book Styles --- */
         #book-section { 
-            display: none; 
-            justify-content: center; 
-            align-items: center; 
-            width: 100%; 
-            height: 100vh; 
-            opacity: 0; 
-            transition: opacity 1s ease; 
-            /* Safety padding for small screens */
+            display: none; justify-content: center; align-items: center; 
+            width: 100%; height: 100vh; opacity: 0; transition: opacity 1s ease; 
             padding: 10px;
         }
         .page { background-color: #fff; border: 1px solid #ddd; padding: 0; overflow: hidden; }
         .page-content { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         
-        /* Cover Styles */
         .page.cover {
             padding: 20px;
             background-color: #FFCDD2; color: #880E4F;
@@ -125,7 +122,6 @@
         .open-hint { margin-top: 50px; font-weight: bold; animation: bounceRight 1.5s infinite; color: #880E4F; }
         @keyframes bounceRight { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
 
-        /* Last Page Styles */
         .page.last-page {
             padding: 20px;
             background-color: #fff0f5; background-image: radial-gradient(#f48fb1 2px, transparent 2px); background-size: 20px 20px;
@@ -136,27 +132,69 @@
             transform: rotate(-3deg); margin-bottom: 30px; width: 70%; max-width: 200px;
         }
         .last-page h2 { font-family: 'Brush Script MT', cursive; font-size: 2.5rem; color: #880E4F; margin-bottom: 10px; }
-        .last-page p { font-size: 1.2rem; color: #555; font-style: italic; }
-
-        /* Photo Container & Image Fitting */
-        .photo-container { 
-            width: 100%; 
-            height: 100%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background-color: #fff; 
-        }
-        .photo-container img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; /* UPDATED: Ensures image is never cut off */
+        
+        /* UPDATED: Added white text stroke */
+        .last-page p { 
+            font-size: 1.2rem; 
+            color: #555; 
+            font-style: italic;
+            font-weight: bold; /* Bold makes the stroke look better */
+            text-shadow: 
+                2px 2px 0 #fff, 
+                -2px -2px 0 #fff, 
+                2px -2px 0 #fff, 
+                -2px 2px 0 #fff; /* White outline effect */
         }
 
-        /* Mobile Adjustments */
+        .photo-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #fff; }
+        .photo-container img { width: 100%; height: 100%; object-fit: contain; }
+
         @media (max-width: 768px) {
             .page.cover h1 { font-size: 2rem !important; }
-            .page.cover { padding: 15px !important; } /* Reduce padding on small screens */
+            .page.cover { padding: 15px !important; }
+        }
+
+        /* --- 5. Animation: Play Once Styles --- */
+        .polaroid-window {
+            position: relative; width: 100%; height: 150px; background-color: #ddd; overflow: hidden;
+            border: 1px solid #ccc;
+        }
+        .group-photo {
+            width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; 
+        }
+        
+        .camera-cover {
+            width: 100%; height: 100%; background-color: #ddd; color: #888;
+            display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 0; left: 0; z-index: 2;
+            opacity: 1; 
+        }
+        
+        .flash-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #fff; opacity: 0; z-index: 3; pointer-events: none;
+        }
+
+        /* Animation Trigger */
+        .polaroid-window.playing .camera-cover {
+            animation: shutterOnce 2.5s ease-in-out forwards;
+        }
+        .polaroid-window.playing .flash-overlay {
+            animation: flashOnce 2.5s ease-in-out forwards;
+        }
+
+        @keyframes shutterOnce {
+            0% { opacity: 1; transform: scale(1); background-color: #ddd; }
+            30% { transform: scale(0.95); background-color: #333; color: #fff; } 
+            40% { opacity: 1; background-color: #ddd; } 
+            60% { opacity: 0; } 
+            100% { opacity: 0; visibility: hidden; } 
+        }
+        @keyframes flashOnce {
+            0%, 30% { opacity: 0; }
+            35% { opacity: 1; } 
+            50% { opacity: 0; }
+            100% { opacity: 0; }
         }
     </style>
 </head>
@@ -183,7 +221,7 @@
             </div>
             <div id="swipe-hint" class="swipe-hint-container">
                 <img src="hand-point-up-regular.svg" class="hand-icon" alt="swipe hint">
-             </div>
+            </div>
         </div>
 
         <div id="book-section">
@@ -192,10 +230,7 @@
     </div>
 
     <script>
-        // Configuration
-        const totalImages = 30; 
-        
-        // DOM Elements
+        const totalImages = 31; 
         const interactionLayer = document.getElementById('interaction-layer');
         const cake = document.getElementById('cake');
         const flames = document.querySelectorAll('.flame');
@@ -205,14 +240,11 @@
         const modalBtn = document.getElementById('modal-btn');
         const bookContainer = document.getElementById('my-book');
 
-        // Logic Variables
         let startX = 0, startY = 0, isExtinguished = false;
         const threshold = 30;
 
-        // Prevent Context Menu
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // --- Interaction Logic (Touch & Mouse) ---
         interactionLayer.addEventListener('touchstart', e => {
             startX = e.touches[0].clientX; startY = e.touches[0].clientY;
         }, { passive: true });
@@ -238,7 +270,6 @@
             }
         }
 
-        // --- Transition to Book ---
         modalBtn.addEventListener('click', () => {
             modalOverlay.classList.remove('show');
             cake.style.transition = 'opacity 0.8s ease';
@@ -252,7 +283,6 @@
             }, 800);
         });
 
-        // --- Book Generation ---
         function generateBookHTML() {
             let html = `
                 <div class="page cover" data-density="hard">
@@ -265,7 +295,6 @@
                     </div>
                 </div>`;
 
-            // Images loop
             for (let i = 1; i <= totalImages; i++) {
                 html += `
                     <div class="page">
@@ -277,13 +306,16 @@
                     </div>`;
             }
 
-            // Back Cover
             html += `
                 <div class="page last-page" data-density="hard">
                     <div class="page-content">
                         <div class="polaroid-frame">
-                            <div style="width:100%; height:150px; background:#ddd; display:flex; align-items:center; justify-content:center; color:#888;">
-                                <i class="fas fa-camera fa-2x"></i>
+                            <div class="polaroid-window">
+                                <img src="images/group.jpg" class="group-photo" alt="Group Photo">
+                                <div class="camera-cover">
+                                    <i class="fas fa-camera fa-2x"></i>
+                                </div>
+                                <div class="flash-overlay"></div>
                             </div>
                         </div>
                         <h2>To Be Continued...</h2>
@@ -293,49 +325,48 @@
             bookContainer.innerHTML = html;
         }
 
-        // --- NEW Responsive FlipBook Logic ---
         function initFlipBook() {
-            // Detect mobile
             const isMobile = window.innerWidth < 768;
-            
-            // 1. Define Constraints
-            // Use 95% of screen width max to avoid overflow
             const maxWidth = window.innerWidth * 0.95; 
-            // Use 85% of screen height max
             const maxHeight = window.innerHeight * 0.85; 
-
-            // 2. Define Aspect Ratio (Width / Height)
-            // Original: 550 / 733 ~= 0.75
             const aspectRatio = 550 / 733;
 
-            // 3. Calculate Dimensions
-            // First, try setting height to max and calculating width
             let targetHeight = maxHeight;
             let targetWidth = Math.floor(targetHeight * aspectRatio);
 
-            // Check if this width exceeds available screen width
             if (targetWidth > maxWidth) {
-                // If it's too wide, constrain by width instead
                 targetWidth = maxWidth;
                 targetHeight = Math.floor(targetWidth / aspectRatio);
             }
 
-            // 4. Initialize
             const pageFlip = new St.PageFlip(document.getElementById('my-book'), {
                 width: targetWidth,
                 height: targetHeight,
                 size: 'fixed',
-                usePortrait: isMobile, // Single page mode on mobile
+                usePortrait: isMobile,
                 showCover: true,
-                mobileScrollSupport: false, // Disabled to prevent swipe conflicts
+                mobileScrollSupport: false, 
                 swipeDistance: 20,
                 maxShadowOpacity: 0.2
             });
 
             pageFlip.loadFromHTML(document.querySelectorAll('.page'));
-            
-            // Optional: Reload on resize to recalculate dimensions
-            // window.addEventListener('resize', () => { location.reload(); });
+
+            // FIX: Robust Animation Trigger Logic with Delay
+            pageFlip.on('flip', (e) => {
+                if (e.data >= totalImages) {
+                    const polaroids = document.querySelectorAll('.polaroid-window');
+                    
+                    polaroids.forEach(p => {
+                        if (!p.classList.contains('playing')) {
+                            // Wait 1 second (1000ms) before playing
+                            setTimeout(() => {
+                                p.classList.add('playing');
+                            }, 1000); 
+                        }
+                    });
+                }
+            });
         }
     </script>
 </body>
