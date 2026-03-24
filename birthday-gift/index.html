@@ -127,20 +127,23 @@
             background-color: #fff0f5; background-image: radial-gradient(#f48fb1 2px, transparent 2px); background-size: 20px 20px;
             border-right: none; border-left: none; border: 5px solid #fff; box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
         }
+        
+        /* UPDATED: Increased frame size and padding */
         .polaroid-frame {
             background: white; 
-            padding: 10px 10px 35px 10px; /* Adjusted padding for better proportion */
+            padding: 15px 15px 50px 15px; /* Increased padding for better proportion */
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transform: rotate(-3deg); 
             margin-bottom: 30px; 
-            width: 85%; /* Increased width to accommodate landscape photo */
-            max-width: 280px; /* Increased max-width */
+            width: 98%; /* Increased width to utilize more page space */
+            max-width: 480px; /* Increased max-width significantly */
         }
 		.polaroid-window {
             position: relative; 
             width: 100%; 
             height: auto; /* Removed fixed 150px height */
-            aspect-ratio: 2056 / 1080; /* Set exact aspect ratio of group.jpg */
+            /* UPDATED: Aspect ratio to 2848/1494 */
+            aspect-ratio: 2848 / 1494; /* Set exact aspect ratio of new group.jpg */
             background-color: #ddd; 
             overflow: hidden;
             border: 1px solid #ccc;
@@ -156,7 +159,8 @@
             z-index: 1; 
         }
 		
-        .last-page h2 { font-family: 'Brush Script MT', cursive; font-size: 2.5rem; color: #880E4F; margin-bottom: 10px; }
+        /* UPDATED: Added margin-top to balance larger frame */
+        .last-page h2 { font-family: 'Brush Script MT', cursive; font-size: 2.5rem; color: #880E4F; margin-bottom: 10px; margin-top: 20px;}
         
         /* UPDATED: Added white text stroke */
         .last-page p { 
@@ -180,14 +184,6 @@
         }
 
         /* --- 5. Animation: Play Once Styles --- */
-        .polaroid-window {
-            position: relative; width: 100%; height: 150px; background-color: #ddd; overflow: hidden;
-            border: 1px solid #ccc;
-        }
-        .group-photo {
-            width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 1; 
-        }
-        
         .camera-cover {
             width: 100%; height: 100%; background-color: #ddd; color: #888;
             display: flex; align-items: center; justify-content: center;
