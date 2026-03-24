@@ -128,9 +128,34 @@
             border-right: none; border-left: none; border: 5px solid #fff; box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
         }
         .polaroid-frame {
-            background: white; padding: 15px 15px 40px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transform: rotate(-3deg); margin-bottom: 30px; width: 70%; max-width: 200px;
+            background: white; 
+            padding: 10px 10px 35px 10px; /* Adjusted padding for better proportion */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: rotate(-3deg); 
+            margin-bottom: 30px; 
+            width: 85%; /* Increased width to accommodate landscape photo */
+            max-width: 280px; /* Increased max-width */
         }
+		.polaroid-window {
+            position: relative; 
+            width: 100%; 
+            height: auto; /* Removed fixed 150px height */
+            aspect-ratio: 2056 / 1080; /* Set exact aspect ratio of group.jpg */
+            background-color: #ddd; 
+            overflow: hidden;
+            border: 1px solid #ccc;
+        }
+        
+        .group-photo {
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; /* Ensure the image is fully visible without cropping */
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            z-index: 1; 
+        }
+		
         .last-page h2 { font-family: 'Brush Script MT', cursive; font-size: 2.5rem; color: #880E4F; margin-bottom: 10px; }
         
         /* UPDATED: Added white text stroke */
@@ -230,7 +255,7 @@
     </div>
 
     <script>
-        const totalImages = 44; 
+        const totalImages = 45; 
         const interactionLayer = document.getElementById('interaction-layer');
         const cake = document.getElementById('cake');
         const flames = document.querySelectorAll('.flame');
