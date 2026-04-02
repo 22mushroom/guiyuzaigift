@@ -221,6 +221,11 @@
 </head>
 <body>
 
+	<audio id="bg-music" loop preload="auto">
+        <source src="your-song-file.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <div class="credits">web power by Azrael</div>
 
     <div id="modal-overlay" class="modal-overlay">
@@ -252,143 +257,168 @@
 
     <script>
         const totalImages = 45; 
-        const interactionLayer = document.getElementById('interaction-layer');
-        const cake = document.getElementById('cake');
-        const flames = document.querySelectorAll('.flame');
-        const swipeHint = document.getElementById('swipe-hint');
-        const bookSection = document.getElementById('book-section');
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalBtn = document.getElementById('modal-btn');
-        const bookContainer = document.getElementById('my-book');
+		const interactionLayer = document.getElementById('interaction-layer');
+		const cake = document.getElementById('cake');
+		const flames = document.querySelectorAll('.flame');
+		const swipeHint = document.getElementById('swipe-hint');
+		const bookSection = document.getElementById('book-section');
+		const modalOverlay = document.getElementById('modal-overlay');
+		const modalBtn = document.getElementById('modal-btn');
+		const bookContainer = document.getElementById('my-book');
 
-        let startX = 0, startY = 0, isExtinguished = false;
-        const threshold = 30;
+		// Get the audio element for background music
+		const bgMusic = document.getElementById('bg-music');
 
-        document.addEventListener('contextmenu', e => e.preventDefault());
+		let startX = 0, startY = 0, isExtinguished = false;
+		const threshold = 30;
 
-        interactionLayer.addEventListener('touchstart', e => {
-            startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-        }, { passive: true });
+		// Prevent context menu
+		document.addEventListener('contextmenu', e => e.preventDefault());
 
-        interactionLayer.addEventListener('touchend', e => {
-            if (isExtinguished) return;
-            handleGesture(startX, startY, e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-        });
+		// Touch events for swiping
+		interactionLayer.addEventListener('touchstart', e => {
+			startX = e.touches[0].clientX; 
+			startY = e.touches[0].clientY;
+		}, { passive: true });
 
-        interactionLayer.addEventListener('mousedown', e => { startX = e.clientX; startY = e.clientY; });
-        interactionLayer.addEventListener('mouseup', e => {
-            if (isExtinguished) return;
-            handleGesture(startX, startY, e.clientX, e.clientY);
-        });
+		interactionLayer.addEventListener('touchend', e => {
+			if (isExtinguished) return;
+			handleGesture(startX, startY, e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+		});
 
-        function handleGesture(sX, sY, eX, eY) {
-            const dist = Math.sqrt(Math.pow(eX - sX, 2) + Math.pow(eY - sY, 2));
-            if (dist > threshold) {
-                isExtinguished = true;
-                if (swipeHint) swipeHint.classList.add('hide');
-                flames.forEach(f => f.classList.add('out'));
-                setTimeout(() => modalOverlay.classList.add('show'), 600);
-            }
-        }
+		// Mouse events for swiping
+		interactionLayer.addEventListener('mousedown', e => { 
+			startX = e.clientX; 
+			startY = e.clientY; 
+		});
 
-        modalBtn.addEventListener('click', () => {
-            modalOverlay.classList.remove('show');
-            cake.style.transition = 'opacity 0.8s ease';
-            cake.style.opacity = '0';
-            setTimeout(() => {
-                cake.style.display = 'none';
-                bookSection.style.display = 'flex'; 
-                generateBookHTML();
-                initFlipBook();
-                bookSection.style.opacity = '1';
-            }, 800);
-        });
+		interactionLayer.addEventListener('mouseup', e => {
+			if (isExtinguished) return;
+			handleGesture(startX, startY, e.clientX, e.clientY);
+		});
 
-        function generateBookHTML() {
-            let html = `
-                <div class="page cover" data-density="hard">
-                    <div class="page-content">
-                        <h1>Happy<br>Birthday!</h1>
-                        <p>To Taylor !</p>
-                        <div class="open-hint">
-                             <span>( ˘ ³˘)♥ 滑動翻頁</span>
-                        </div>
-                    </div>
-                </div>`;
+		// Handle the swipe gesture to blow out candles
+		function handleGesture(sX, sY, eX, eY) {
+			const dist = Math.sqrt(Math.pow(eX - sX, 2) + Math.pow(eY - sY, 2));
+			if (dist > threshold) {
+				isExtinguished = true;
+				if (swipeHint) swipeHint.classList.add('hide');
+				flames.forEach(f => f.classList.add('out'));
+				setTimeout(() => modalOverlay.classList.add('show'), 600);
+			}
+		}
 
-            for (let i = 1; i <= totalImages; i++) {
-                html += `
-                    <div class="page">
-                        <div class="page-content">
-                            <div class="photo-container">
-                                <img src="images/${i}.jpg" alt="Photo ${i}">
-                            </div>
-                        </div>
-                    </div>`;
-            }
+		// Modal button click event (Open gift & play music)
+		modalBtn.addEventListener('click', () => {
+			// Play the background music
+			// Using a try-catch pattern to handle potential browser autoplay restrictions
+			bgMusic.play().catch(error => {
+				console.log("Audio auto-play was prevented by the browser.", error);
+			});
 
-            html += `
-                <div class="page last-page" data-density="hard">
-                    <div class="page-content">
-                        <div class="polaroid-frame">
-                            <div class="polaroid-window">
-                                <img src="images/group.jpg" class="group-photo" alt="Group Photo">
-                                <div class="camera-cover">
-                                    <i class="fas fa-camera fa-2x"></i>
-                                </div>
-                                <div class="flash-overlay"></div>
-                            </div>
-                        </div>
-                        <h2>To Be Continued...</h2>
-                        <p>Forever Friends ❤️</p>
-                    </div>
-                </div>`;
-            bookContainer.innerHTML = html;
-        }
+			// Hide modal and fade out cake
+			modalOverlay.classList.remove('show');
+			cake.style.transition = 'opacity 0.8s ease';
+			cake.style.opacity = '0';
+			
+			// Transition to the flipbook
+			setTimeout(() => {
+				cake.style.display = 'none';
+				bookSection.style.display = 'flex'; 
+				generateBookHTML();
+				initFlipBook();
+				bookSection.style.opacity = '1';
+			}, 800);
+		});
 
-        function initFlipBook() {
-            const isMobile = window.innerWidth < 768;
-            const maxWidth = window.innerWidth * 0.95; 
-            const maxHeight = window.innerHeight * 0.85; 
-            const aspectRatio = 550 / 733;
+		// Generate the HTML structure for the flipbook
+		function generateBookHTML() {
+			let html = `
+				<div class="page cover" data-density="hard">
+					<div class="page-content">
+						<h1>Happy<br>Birthday!</h1>
+						<p>To Taylor !</p>
+						<div class="open-hint">
+							 <span>( ˘ ³˘)♥ 滑動翻頁</span>
+						</div>
+					</div>
+				</div>`;
 
-            let targetHeight = maxHeight;
-            let targetWidth = Math.floor(targetHeight * aspectRatio);
+			for (let i = 1; i <= totalImages; i++) {
+				html += `
+					<div class="page">
+						<div class="page-content">
+							<div class="photo-container">
+								<img src="images/${i}.jpg" alt="Photo ${i}">
+							</div>
+						</div>
+					</div>`;
+			}
 
-            if (targetWidth > maxWidth) {
-                targetWidth = maxWidth;
-                targetHeight = Math.floor(targetWidth / aspectRatio);
-            }
+			html += `
+				<div class="page last-page" data-density="hard">
+					<div class="page-content">
+						<div class="polaroid-frame">
+							<div class="polaroid-window">
+								<img src="images/group.jpg" class="group-photo" alt="Group Photo">
+								<div class="camera-cover">
+									<i class="fas fa-camera fa-2x"></i>
+								</div>
+								<div class="flash-overlay"></div>
+							</div>
+						</div>
+						<h2>To Be Continued...</h2>
+						<p>Forever Friends ❤️</p>
+					</div>
+				</div>`;
+			bookContainer.innerHTML = html;
+		}
 
-            const pageFlip = new St.PageFlip(document.getElementById('my-book'), {
-                width: targetWidth,
-                height: targetHeight,
-                size: 'fixed',
-                usePortrait: isMobile,
-                showCover: true,
-                mobileScrollSupport: false, 
-                swipeDistance: 20,
-                maxShadowOpacity: 0.2
-            });
+		// Initialize the page-flip plugin
+		function initFlipBook() {
+			const isMobile = window.innerWidth < 768;
+			const maxWidth = window.innerWidth * 0.95; 
+			const maxHeight = window.innerHeight * 0.85; 
+			const aspectRatio = 550 / 733;
 
-            pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+			let targetHeight = maxHeight;
+			let targetWidth = Math.floor(targetHeight * aspectRatio);
 
-            // FIX: Robust Animation Trigger Logic with Delay
-            pageFlip.on('flip', (e) => {
-                if (e.data >= totalImages) {
-                    const polaroids = document.querySelectorAll('.polaroid-window');
-                    
-                    polaroids.forEach(p => {
-                        if (!p.classList.contains('playing')) {
-                            // Wait 1 second (1000ms) before playing
-                            setTimeout(() => {
-                                p.classList.add('playing');
-                            }, 1000); 
-                        }
-                    });
-                }
-            });
-        }
+			// Maintain aspect ratio within bounds
+			if (targetWidth > maxWidth) {
+				targetWidth = maxWidth;
+				targetHeight = Math.floor(targetWidth / aspectRatio);
+			}
+
+			const pageFlip = new St.PageFlip(document.getElementById('my-book'), {
+				width: targetWidth,
+				height: targetHeight,
+				size: 'fixed',
+				usePortrait: isMobile,
+				showCover: true,
+				mobileScrollSupport: false, 
+				swipeDistance: 20,
+				maxShadowOpacity: 0.2
+			});
+
+			pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+
+			// Robust Animation Trigger Logic with Delay for the last page
+			pageFlip.on('flip', (e) => {
+				if (e.data >= totalImages) {
+					const polaroids = document.querySelectorAll('.polaroid-window');
+					
+					polaroids.forEach(p => {
+						if (!p.classList.contains('playing')) {
+							// Wait 1 second (1000ms) before playing the camera animation
+							setTimeout(() => {
+								p.classList.add('playing');
+							}, 1000); 
+						}
+					});
+				}
+			});
+		}
     </script>
 </body>
 </html>
